@@ -2,6 +2,7 @@ package com.saurav.cms.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.saurav.cms.dto.person.Register;
@@ -24,7 +25,8 @@ public class PersonController {
 
     @GetMapping(value = "/")
     public String homePage(HttpServletRequest request, HttpServletResponse response,
-                           @RequestParam(value = "deleteCookie", defaultValue = "false") String deleteCookie){
+                           @RequestParam(value = "deleteCookie", defaultValue = "false") String deleteCookie,
+                           Model model){
         String newToken;
         if (Boolean.parseBoolean(deleteCookie)) {
             newToken = null;
@@ -33,6 +35,7 @@ public class PersonController {
         }
         log.info("Inserting new cookie {}", newToken);
         response.addCookie(new Cookie(jwtTokenValue, newToken));
+        model.addAttribute("loggedIn", newToken!=null);
         return "index";
     }
     

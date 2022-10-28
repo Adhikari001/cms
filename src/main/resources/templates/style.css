@@ -1,0 +1,14 @@
+body{
+    margin: 0:
+
+}
+
+.item_in_center{
+    align-items: center;
+    text-align: center;
+}
+
+.error_message{
+    font-size: .80em;
+    color: red;
+}
