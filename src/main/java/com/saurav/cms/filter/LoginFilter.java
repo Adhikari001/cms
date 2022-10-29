@@ -21,6 +21,7 @@ public class LoginFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         Optional<String> jwtToken = HelperUtil.readServletCookie(request.getCookies(), jwtTokenValue);
+        System.out.println("login filter :: " + request.getContextPath());
         if(jwtToken.isPresent()){
 
         }
