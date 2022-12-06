@@ -18,10 +18,11 @@ function validateLoginForm(){
     if(email===""){
         document.getElementById("emailValidationMessage").innerHTML = "Email can not be empty";
         valid = false;
-    }
-    if(!emailRegx.test(email)){
+    }else if(!emailRegx.test(email)){
         document.getElementById("emailValidationMessage").innerHTML = "Email is not valid";
         valid = false
+    }else{
+        document.getElementById("emailValidationMessage").innerHTML = "";
     }
 
     let password = loginForm["inputPasswordField"].value;
@@ -29,15 +30,18 @@ function validateLoginForm(){
     if(password.length<7){
         document.getElementById("passwordValidationMessage").innerHTML = "Password length must be greater than 7 characters"
         valid = false;
-    }
-    if(!passwordRegx.test(password)){
-        document.getElementById("passwordValidationMessage").innerHTML = "Password length must contain special character and a number"
+    }else if(!passwordRegx.test(password)){
+        document.getElementById("passwordValidationMessage").innerHTML = "Password must contain special character and a number"
         valid = false;
+    }else{
+        document.getElementById("passwordValidationMessage").innerHTML = ""
     }
 
     if(!document.getElementById("termsCheckBox").checked){
         document.getElementById("termsAcceptMessage").innerHTML = "Please check this to continue"
         valid = false;
+    }else{
+        document.getElementById("termsAcceptMessage").innerHTML = ""
     }
     return valid;
 }
