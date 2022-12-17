@@ -1,44 +1,54 @@
 package com.saurav.cms.comms.security;
 
+import com.saurav.cms.repository.MyUserRepository;
+import com.saurav.cms.service.rolepermission.RoleService;
+import com.saurav.cms.service.user.MyUserDetailServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
 
+    private final MyUserRepository myUserRepository;
+    private final JWTTokenUtil jwtTokenUtil;
+
+    private final RoleService roleService;
+
+    @Autowired
+    public WebSecurityConfig(MyUserRepository myUserRepository, JWTTokenUtil jwtTokenUtil, RoleService roleService) {
+        this.myUserRepository = myUserRepository;
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.roleService = roleService;
+    }
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .antMatchers("/", "/home").permitAll()
+                        .antMatchers("**.css", "**.js", "/images/**", "/register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
                         .permitAll()
                 )
-                .logout((logout) -> logout.permitAll());
+                .logout(LogoutConfigurer::permitAll);
 
         return http.build();
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user =
-                User.withDefaultPasswordEncoder()
-                        .username("saurav@saurav.com")
-                        .password("Saurav@123")
-                        .roles("USER")
-                        .build();
-
-        return new InMemoryUserDetailsManager(user);
+        return new MyUserDetailServiceImpl(myUserRepository, jwtTokenUtil, roleService);
     }
+
+
 }

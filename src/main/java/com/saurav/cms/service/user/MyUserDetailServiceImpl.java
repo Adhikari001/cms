@@ -2,12 +2,14 @@ package com.saurav.cms.service.user;
 
 import com.saurav.cms.comms.security.JWTTokenUtil;
 import com.saurav.cms.comms.security.PasswordEncoder;
+import com.saurav.cms.dto.person.InternalResponse;
 import com.saurav.cms.dto.person.LoginRequest;
+import com.saurav.cms.dto.person.UserDto;
 import com.saurav.cms.entity.person.MyUser;
 import com.saurav.cms.repository.MyUserRepository;
+import com.saurav.cms.service.rolepermission.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,23 +21,23 @@ import java.util.Optional;
 public class MyUserDetailServiceImpl implements MyUserDetailService, UserDetailsService {
     private final MyUserRepository myUserRepository;
     private final JWTTokenUtil jwtTokenUtil;
+
+    private final RoleService roleService;
     
     @Autowired
     public MyUserDetailServiceImpl(MyUserRepository myUserRepository,
-                                   JWTTokenUtil jwtTokenUtil) {
+                                   JWTTokenUtil jwtTokenUtil, RoleService roleService) {
         this.myUserRepository = myUserRepository;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.roleService = roleService;
     }
-
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<MyUser> optionalPerson = myUserRepository.findPersonByEmail(username);
-        if(optionalPerson.isEmpty()){
+        MyUser user = myUserRepository.findByUsername(username);
+        if(user == null){
             throw new UsernameNotFoundException("Can not find user from the provided username :: " + username);
         }
-        MyUser myUser = optionalPerson.get();
-        return User.withUsername(myUser.getEmail()).password(myUser.getPassword()).authorities("USER").passwordEncoder().build();
+        return new MyUserPrincipal(user);
     }
     @Override
     public Pair<Boolean, String> loginRequest(LoginRequest request) {
@@ -50,4 +52,23 @@ public class MyUserDetailServiceImpl implements MyUserDetailService, UserDetails
         String jwt = jwtTokenUtil.createJWT(myUser.getEmail(), null, myUser.getRole().getName());
         return Pair.of(true, jwt);
     }
+
+    @Override
+    public InternalResponse<String> registerNewUserAccount(UserDto userDto) {
+        if (emailExists(userDto.getEmail())) {
+            return new InternalResponse<>("There is an account with that email address: " + userDto.getEmail());
+        }
+        MyUser user = new MyUser();
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setPassword(userDto.getPassword());
+        user.setEmail(user.getEmail());
+        user.setRole(roleService.getRoleById(1L));
+        return new InternalResponse<>(null, "");
+    }
+
+    private boolean emailExists(String email) {
+        return myUserRepository.findByEmail(email) != null;
+    }
+
 }
