@@ -24,14 +24,20 @@ public class UserDto {
     @NotEmpty(message = "Password can not be empty")
     private String password;
 
-    @NotNull
-    @NotEmpty
+    @NotNull(message = "Confirm password can not be empty")
+    @NotEmpty(message = "Confirm password can not be empty")
     private String matchingPassword;
 
-    @ValidEmail
-    @NotNull
-    @NotEmpty
+    @ValidEmail(message = "Provided email is not valid")
+    @NotNull(message = "Email can not be empty")
+    @NotEmpty(message = "Email can not be empty")
     private String email;
 
-    // standard getters and setters
+    public UserDto() {
+        this.firstName = "Saurav";
+        this.lastName = "Adhikari";
+        this.password = "Saurav@123";
+        this.matchingPassword = "Saurav@123";
+        this.email = "saurav@saurav.com";
+    }
 }
